@@ -1,4 +1,4 @@
-module ThinkingSphinx::Deltas::ResqueDelta::IndexUtils
+module ThinkingSphinx::Deltas::SidekiqDelta::IndexUtils
   extend self
 
   # Public: Return a list of index prefixes (i.e. without "_core"/"_delta").

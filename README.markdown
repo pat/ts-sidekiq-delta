@@ -24,7 +24,7 @@ Add the delta property to each `define_index` block:
 
     define_index do
       # ...
-      set_property :delta => ThinkingSphinx::Deltas::ResqueDelta
+      set_property :delta => ThinkingSphinx::Deltas::SidekiqDelta
     end
 
 If you've never used delta indexes before, you'll want to add the boolean

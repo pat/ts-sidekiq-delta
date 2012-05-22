@@ -1,6 +1,6 @@
 Before do
   $queries_executed = []
-  ThinkingSphinx::Deltas::ResqueDelta.clear!
+  ThinkingSphinx::Deltas::SidekiqDelta.clear!
   @model      = nil
   @method     = :search
   @query      = ""
@@ -34,7 +34,7 @@ Given "I have data" do
 end
 
 Given "I have indexed" do
-  ThinkingSphinx::Deltas::ResqueDelta.clear!
+  ThinkingSphinx::Deltas::SidekiqDelta.clear!
   ThinkingSphinx::Configuration.instance.controller.index
   sleep(1.5)
 end

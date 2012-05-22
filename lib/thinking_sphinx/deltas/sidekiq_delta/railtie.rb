@@ -1,6 +1,6 @@
 require 'rails'
 
-class ThinkingSphinx::Deltas::ResqueDelta::Railtie < Rails::Railtie
+class ThinkingSphinx::Deltas::SidekiqDelta::Railtie < Rails::Railtie
 
   rake_tasks do
     load File.expand_path('../tasks.rb', __FILE__)

@@ -1,18 +1,18 @@
 require 'spec_helper'
 
-describe ThinkingSphinx::Deltas::ResqueDelta::CoreIndex do
+describe ThinkingSphinx::Deltas::SidekiqDelta::CoreIndex do
   let(:indices) { %w[foo bar] }
   let(:config) { double('config') }
 
   describe '#lock_delta' do
     it 'should lock the delta' do
-      ThinkingSphinx::Deltas::ResqueDelta.should_receive(:lock)
+      ThinkingSphinx::Deltas::SidekiqDelta.should_receive(:lock)
 
       subject.lock_delta('foo')
     end
 
     it 'should lock the delta for the given index' do
-      ThinkingSphinx::Deltas::ResqueDelta.should_receive(:lock).with('foo_delta')
+      ThinkingSphinx::Deltas::SidekiqDelta.should_receive(:lock).with('foo_delta')
 
       subject.lock_delta('foo')
     end
@@ -20,13 +20,13 @@ describe ThinkingSphinx::Deltas::ResqueDelta::CoreIndex do
 
   describe '#unlock_delta' do
     it 'should unlock the delta' do
-      ThinkingSphinx::Deltas::ResqueDelta.should_receive(:unlock)
+      ThinkingSphinx::Deltas::SidekiqDelta.should_receive(:unlock)
 
       subject.unlock_delta('foo')
     end
 
     it 'should unlock the delta for the given index' do
-      ThinkingSphinx::Deltas::ResqueDelta.should_receive(:unlock).with('foo_delta')
+      ThinkingSphinx::Deltas::SidekiqDelta.should_receive(:unlock).with('foo_delta')
 
       subject.unlock_delta('foo')
     end
@@ -105,7 +105,7 @@ describe ThinkingSphinx::Deltas::ResqueDelta::CoreIndex do
       subject.stub(:lock_delta)
       subject.stub(:unlock_delta)
 
-      ThinkingSphinx::Deltas::ResqueDelta.stub(:prepare_for_core_index)
+      ThinkingSphinx::Deltas::SidekiqDelta.stub(:prepare_for_core_index)
       Resque.stub(:enqueue)
     end
 
@@ -150,7 +150,7 @@ describe ThinkingSphinx::Deltas::ResqueDelta::CoreIndex do
       end
 
       it 'should signal resque delta to prepare for the core index' do
-        ThinkingSphinx::Deltas::ResqueDelta.should_receive(:prepare_for_core_index)
+        ThinkingSphinx::Deltas::SidekiqDelta.should_receive(:prepare_for_core_index)
         subject.smart_index
       end
     end
@@ -166,7 +166,7 @@ describe ThinkingSphinx::Deltas::ResqueDelta::CoreIndex do
       end
 
       it 'should not signal resque delta to prepare for the core index' do
-        ThinkingSphinx::Deltas::ResqueDelta.should_not_receive(:prepare_for_core_index)
+        ThinkingSphinx::Deltas::SidekiqDelta.should_not_receive(:prepare_for_core_index)
         subject.smart_index
       end
     end

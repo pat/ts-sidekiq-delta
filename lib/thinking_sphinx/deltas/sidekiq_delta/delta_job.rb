@@ -1,19 +1,17 @@
-require 'resque-lock-timeout'
-
 # A simple job class that processes a given index.
 #
-class ThinkingSphinx::Deltas::ResqueDelta::DeltaJob
-
-  extend Resque::Plugins::LockTimeout
-  @queue = :ts_delta
-  @lock_timeout = 240
+class ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob
+  include Sidekiq::Worker
+  # extend Resque::Plugins::LockTimeout
+  # @queue = :ts_delta
+  # @lock_timeout = 240
 
   # Runs Sphinx's indexer tool to process the index. Currently assumes Sphinx
   # is running.
   #
   # @param [String] index the name of the Sphinx index
   #
-  def self.perform(index)
+  def perform(index)
     return if skip?(index)
 
     config = ThinkingSphinx::Configuration.instance
@@ -25,10 +23,10 @@ class ThinkingSphinx::Deltas::ResqueDelta::DeltaJob
     # Flag As Deleted
     return unless ThinkingSphinx.sphinx_running?
 
-    index = ThinkingSphinx::Deltas::ResqueDelta::IndexUtils.delta_to_core(index)
+    index = ThinkingSphinx::Deltas::SidekiqDelta::IndexUtils.delta_to_core(index)
 
     # Get the document ids we've saved
-    flag_as_deleted_ids = ThinkingSphinx::Deltas::ResqueDelta::FlagAsDeletedSet.processing_members(index)
+    flag_as_deleted_ids = ThinkingSphinx::Deltas::SidekiqDelta::FlagAsDeletedSet.processing_members(index)
 
     unless flag_as_deleted_ids.empty?
       # Filter out the ids that aren't present in sphinx
@@ -45,7 +43,7 @@ class ThinkingSphinx::Deltas::ResqueDelta::DeltaJob
 
   # Try again later if lock is in use.
   def self.lock_failed(*args)
-    Resque.enqueue(self, *args)
+    ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob.perform_async(*args)
   end
 
   # Run only one DeltaJob at a time regardless of index.
@@ -71,23 +69,23 @@ class ThinkingSphinx::Deltas::ResqueDelta::DeltaJob
     # queue. Uses LREM (http://code.google.com/p/redis/wiki/LremCommand) which
     # takes the form: "LREM key count value" and if count == 0 removes all
     # instances of value from the list.
-    redis_job_value = Resque.encode(:class => self.to_s, :args => args)
-    Resque.redis.lrem("queue:#{@queue}", 0, redis_job_value)
+    redis_job_value = {:class => self.to_s, :args => args}.to_json
+    Sidekiq.redis{|r| r.lrem("queue:#{@queue}", 0, redis_job_value) }
 
     # Grab the subset of flag as deleted document ids to work on
-    core_index = ThinkingSphinx::Deltas::ResqueDelta::IndexUtils.delta_to_core(*args)
-    ThinkingSphinx::Deltas::ResqueDelta::FlagAsDeletedSet.get_subset_for_processing(core_index)
+    core_index = ThinkingSphinx::Deltas::SidekiqDelta::IndexUtils.delta_to_core(*args)
+    ThinkingSphinx::Deltas::SidekiqDelta::FlagAsDeletedSet.get_subset_for_processing(core_index)
 
     yield
 
     # Clear processing set
-    ThinkingSphinx::Deltas::ResqueDelta::FlagAsDeletedSet.clear_processing(core_index)
+    ThinkingSphinx::Deltas::SidekiqDelta::FlagAsDeletedSet.clear_processing(core_index)
   end
 
   protected
 
   def self.skip?(index)
-    ThinkingSphinx::Deltas::ResqueDelta.locked?(index)
+    ThinkingSphinx::Deltas::SidekiqDelta.locked?(index)
   end
 
   def self.filter_flag_as_deleted_ids(ids, index)

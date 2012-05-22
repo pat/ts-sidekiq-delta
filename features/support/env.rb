@@ -23,7 +23,7 @@ world.setup
 
 Resque.redis = MockRedis.new
 Before do
-  Resque.redis.flushall
+  Sidekiq.redis{|r| r.flushall}
 end
 
 require 'database_cleaner'

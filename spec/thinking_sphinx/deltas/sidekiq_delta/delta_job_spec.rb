@@ -1,8 +1,8 @@
 require 'spec_helper'
 
-describe ThinkingSphinx::Deltas::ResqueDelta::DeltaJob do
+describe ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob do
   subject do
-    ThinkingSphinx::Deltas::ResqueDelta::DeltaJob.tap do |s|
+    ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob.tap do |s|
       s.stub(:` => true)
       s.stub(:puts => nil)
     end
@@ -11,7 +11,7 @@ describe ThinkingSphinx::Deltas::ResqueDelta::DeltaJob do
   describe '.perform' do
     before :each do
       ThinkingSphinx.suppress_delta_output = false
-      ThinkingSphinx::Deltas::ResqueDelta.stub(:locked?).and_return(false)
+      ThinkingSphinx::Deltas::SidekiqDelta.stub(:locked?).and_return(false)
       ThinkingSphinx.stub(:sphinx_running? => false)
     end
 
@@ -36,7 +36,7 @@ describe ThinkingSphinx::Deltas::ResqueDelta::DeltaJob do
 
     context 'when an index is locked' do
       before do
-        ThinkingSphinx::Deltas::ResqueDelta.stub(:locked?) do |index_name|
+        ThinkingSphinx::Deltas::SidekiqDelta.stub(:locked?) do |index_name|
           index_name == 'foo_delta' ? true : false
         end
       end
@@ -62,12 +62,12 @@ describe ThinkingSphinx::Deltas::ResqueDelta::DeltaJob do
         ThinkingSphinx::Configuration.instance.stub(:client => client)
         ThinkingSphinx.stub(:sphinx_running? => true)
 
-        ThinkingSphinx::Deltas::ResqueDelta::FlagAsDeletedSet.stub(:processing_members => document_ids)
+        ThinkingSphinx::Deltas::SidekiqDelta::FlagAsDeletedSet.stub(:processing_members => document_ids)
         subject.stub(:filter_flag_as_deleted_ids => document_ids)
       end
 
       it 'should get the processing set of flag as deleted document ids' do
-        ThinkingSphinx::Deltas::ResqueDelta::FlagAsDeletedSet.should_receive(:processing_members).with('foo_core')
+        ThinkingSphinx::Deltas::SidekiqDelta::FlagAsDeletedSet.should_receive(:processing_members).with('foo_core')
         subject.perform('foo_delta')
       end
 
@@ -139,8 +139,8 @@ describe ThinkingSphinx::Deltas::ResqueDelta::DeltaJob do
     before :each do
       Resque.stub(:encode => 'DeltaJobsAreAwesome')
       Resque.stub_chain(:redis, :lrem)
-      ThinkingSphinx::Deltas::ResqueDelta::FlagAsDeletedSet.stub(:get_subset_for_processing)
-      ThinkingSphinx::Deltas::ResqueDelta::FlagAsDeletedSet.stub(:clear_processing)
+      ThinkingSphinx::Deltas::SidekiqDelta::FlagAsDeletedSet.stub(:get_subset_for_processing)
+      ThinkingSphinx::Deltas::SidekiqDelta::FlagAsDeletedSet.stub(:clear_processing)
     end
 
     it 'should clear all other delta jobs' do
@@ -150,13 +150,13 @@ describe ThinkingSphinx::Deltas::ResqueDelta::DeltaJob do
     end
 
     it 'should set up the processing set of document ids' do
-      ThinkingSphinx::Deltas::ResqueDelta::FlagAsDeletedSet.should_receive(:get_subset_for_processing).with('foo_core')
+      ThinkingSphinx::Deltas::SidekiqDelta::FlagAsDeletedSet.should_receive(:get_subset_for_processing).with('foo_core')
 
       subject.around_perform_lock1('foo_delta') {}
     end
 
     it 'should clear the processing set when finished' do
-      ThinkingSphinx::Deltas::ResqueDelta::FlagAsDeletedSet.should_receive(:clear_processing).with('foo_core')
+      ThinkingSphinx::Deltas::SidekiqDelta::FlagAsDeletedSet.should_receive(:clear_processing).with('foo_core')
 
       subject.around_perform_lock1('foo_delta') {}
     end

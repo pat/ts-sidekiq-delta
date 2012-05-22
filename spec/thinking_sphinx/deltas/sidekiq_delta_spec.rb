@@ -1,20 +1,20 @@
 require 'spec_helper'
 
-describe ThinkingSphinx::Deltas::ResqueDelta do
+describe ThinkingSphinx::Deltas::SidekiqDelta do
   before :each do
     ThinkingSphinx.updates_enabled = true
     ThinkingSphinx.deltas_enabled  = true
 
-    Resque.redis = MockRedis.new
+    Sidekiq.redis = MockRedis.new
   end
 
   describe '#index' do
     def flag_as_deleted_document_in_set?
-      Resque.redis.sismember(ThinkingSphinx::Deltas::ResqueDelta::FlagAsDeletedSet.set_name('foo_core'), 42)
+      Sidekiq.redis{|r| r.sismember(ThinkingSphinx::Deltas::SidekiqDelta::FlagAsDeletedSet.set_name('foo_core'), 42) }
     end
 
     subject do
-      ThinkingSphinx::Deltas::ResqueDelta.new(
+      ThinkingSphinx::Deltas::SidekiqDelta.new(
         stub('instance'), {}
       ).tap do |s| 
         s.stub(:toggled).and_return(true)
@@ -49,7 +49,7 @@ describe ThinkingSphinx::Deltas::ResqueDelta do
       end
 
       it "should not enqueue a delta job" do
-        Resque.should_not_receive(:enqueue)
+        ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob.should_not_receive(:perform_async)
         subject.index(model)
       end
 
@@ -65,7 +65,7 @@ describe ThinkingSphinx::Deltas::ResqueDelta do
       end
 
       it "should not enqueue a delta job" do
-        Resque.should_not_receive(:enqueue)
+        ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob.should_not_receive(:perform_async)
         subject.index(model)
       end
 
@@ -81,7 +81,7 @@ describe ThinkingSphinx::Deltas::ResqueDelta do
       end
 
       it "should not enqueue a delta job" do
-        Resque.should_not_receive(:enqueue)
+        ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob.should_not_receive(:perform_async)
         subject.index(model, instance)
       end
 
@@ -92,8 +92,7 @@ describe ThinkingSphinx::Deltas::ResqueDelta do
     end
 
     it "should enqueue a delta job" do
-      Resque.should_receive(:enqueue).once.with(
-        ThinkingSphinx::Deltas::ResqueDelta::DeltaJob,
+      ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob.should_receive(:peform_async).once.with(
         'foo_delta'
       )
       subject.index(model)
@@ -106,11 +105,11 @@ describe ThinkingSphinx::Deltas::ResqueDelta do
 
     context "delta index is locked" do
       before :each do
-        ThinkingSphinx::Deltas::ResqueDelta.stub(:locked?).and_return(true)
+        ThinkingSphinx::Deltas::SidekiqDelta.stub(:locked?).and_return(true)
       end
 
       it "should not enqueue a delta job" do
-        Resque.should_not_receive(:enqueue)
+        ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob.should_not_receive(:perform_async)
         subject.index(model, instance)
       end
 
@@ -122,7 +121,7 @@ describe ThinkingSphinx::Deltas::ResqueDelta do
   end
 
   describe '.clear_thinking_sphinx_queues' do
-    subject { ThinkingSphinx::Deltas::ResqueDelta.clear_thinking_sphinx_queues }
+    subject { ThinkingSphinx::Deltas::SidekiqDelta.clear_thinking_sphinx_queues }
 
     before :all do
       class RandomJob
@@ -131,9 +130,10 @@ describe ThinkingSphinx::Deltas::ResqueDelta do
     end
 
     before :each do
-      Resque.enqueue(ThinkingSphinx::Deltas::ResqueDelta::DeltaJob, 'foo_delta')
-      Resque.enqueue(ThinkingSphinx::Deltas::ResqueDelta::DeltaJob, 'bar_delta')
-      Resque.enqueue(RandomJob, '1234')
+      ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob.perform_async('foo_delta')
+      ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob.perform_async('bar_delta')
+
+      Sidekiq::Client.enqueue(RandomJob, '1234')
     end
 
     it 'should remove all jobs' do
@@ -144,24 +144,24 @@ describe ThinkingSphinx::Deltas::ResqueDelta do
 
   describe '.lock' do
     it 'should set the lock key in redis' do
-      ThinkingSphinx::Deltas::ResqueDelta.lock('foo')
-      Resque.redis.get("#{ThinkingSphinx::Deltas::ResqueDelta.job_prefix}:index:foo:locked").should eql('true')
+      ThinkingSphinx::Deltas::SidekiqDelta.lock('foo')
+      Resque.redis.get("#{ThinkingSphinx::Deltas::SidekiqDelta.job_prefix}:index:foo:locked").should eql('true')
     end
   end
 
   describe '.unlock' do
     it 'should unset the lock key in redis' do
-      Resque.redis.set("#{ThinkingSphinx::Deltas::ResqueDelta.job_prefix}:index:foo:locked", 'true')
-      ThinkingSphinx::Deltas::ResqueDelta.unlock('foo')
-      Resque.redis.get("#{ThinkingSphinx::Deltas::ResqueDelta.job_prefix}:index:foo:locked").should be_nil
+      Resque.redis.set("#{ThinkingSphinx::Deltas::SidekiqDelta.job_prefix}:index:foo:locked", 'true')
+      ThinkingSphinx::Deltas::SidekiqDelta.unlock('foo')
+      Resque.redis.get("#{ThinkingSphinx::Deltas::SidekiqDelta.job_prefix}:index:foo:locked").should be_nil
     end
   end
 
   describe '.locked?' do
-    subject { ThinkingSphinx::Deltas::ResqueDelta.locked?('foo') }
+    subject { ThinkingSphinx::Deltas::SidekiqDelta.locked?('foo') }
 
     context "when lock key in redis is true" do
-      before { Resque.redis.set("#{ThinkingSphinx::Deltas::ResqueDelta.job_prefix}:index:foo:locked", 'true') }
+      before { Resque.redis.set("#{ThinkingSphinx::Deltas::SidekiqDelta.job_prefix}:index:foo:locked", 'true') }
       it { should be_true }
     end
 
@@ -171,20 +171,20 @@ describe ThinkingSphinx::Deltas::ResqueDelta do
   end
 
   describe '.prepare_for_core_index' do
-    subject { ThinkingSphinx::Deltas::ResqueDelta.prepare_for_core_index('foo') }
+    subject { ThinkingSphinx::Deltas::SidekiqDelta.prepare_for_core_index('foo') }
 
     before :each do
       Resque.stub(:dequeue)
-      ThinkingSphinx::Deltas::ResqueDelta::FlagAsDeletedSet.stub(:clear!)
+      ThinkingSphinx::Deltas::SidekiqDelta::FlagAsDeletedSet.stub(:clear!)
     end
 
     it "should call FlagAsDeletedSet.clear!" do
-      ThinkingSphinx::Deltas::ResqueDelta::FlagAsDeletedSet.should_receive(:clear!).with('foo_core')
+      ThinkingSphinx::Deltas::SidekiqDelta::FlagAsDeletedSet.should_receive(:clear!).with('foo_core')
       subject
     end
 
     it "should clear delta jobs" do
-      Resque.should_receive(:dequeue).with(ThinkingSphinx::Deltas::ResqueDelta::DeltaJob, 'foo_delta')
+      Resque.should_receive(:dequeue).with(ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob, 'foo_delta')
       subject
     end
   end

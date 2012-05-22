@@ -1,18 +1,18 @@
 # -*- encoding: utf-8 -*-
 $:.push File.expand_path("../lib", __FILE__)
-require "thinking_sphinx/deltas/resque_delta/version"
+require "thinking_sphinx/deltas/sidekiq_delta/version"
 
 Gem::Specification.new do |s|
-  s.name        = "ts-resque-delta"
-  s.version     = ThinkingSphinx::Deltas::ResqueDeltaInfo::VERSION
+  s.name        = "ts-sidekiq-delta"
+  s.version     = ThinkingSphinx::Deltas::SidekiqDeltaInfo::VERSION
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ["Aaron Gibralter"]
-  s.email       = ["aaron.gibralter@gmail.com"]
-  s.homepage    = "https://github.com/agibralter/ts-resque-delta"
-  s.summary     = %q{Thinking Sphinx - Resque Deltas}
-  s.description = %q{Manage delta indexes via Resque for Thinking Sphinx}
+  s.authors     = ["Aaron Gibralter", "Danny Hawkins"]
+  s.email       = ["danny.hawkins@gmail.com"]
+  s.homepage    = "https://github.com/danhawkins/ts-sidekiq-delta"
+  s.summary     = %q{Thinking Sphinx - Sidekiq Deltas}
+  s.description = %q{Manage delta indexes via Sidekiq for Thinking Sphinx}
 
-  s.rubyforge_project = "ts-resque-delta"
+  s.rubyforge_project = "ts-sidekiq-delta"
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
@@ -21,8 +21,6 @@ Gem::Specification.new do |s|
 
   s.add_dependency "thinking-sphinx", ">= 1.4.1"
   s.add_dependency "riddle", ">= 1.5"
-  s.add_dependency "resque", "~> 1.10"
-  s.add_dependency "resque-lock-timeout", "~> 0.3.1"
 
   s.add_development_dependency "rspec", "~> 2.7.0"
   s.add_development_dependency "cucumber", ">= 0"

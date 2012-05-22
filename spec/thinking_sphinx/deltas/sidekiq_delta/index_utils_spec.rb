@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe ThinkingSphinx::Deltas::ResqueDelta::IndexUtils do
+describe ThinkingSphinx::Deltas::SidekiqDelta::IndexUtils do
   let(:indices) { %w[foo_core foo_delta foo bar_core bar_delta bar] }
   let(:config) { double('config') }
 

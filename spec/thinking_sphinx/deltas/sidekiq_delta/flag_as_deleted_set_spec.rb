@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe ThinkingSphinx::Deltas::ResqueDelta::FlagAsDeletedSet do
+describe ThinkingSphinx::Deltas::SidekiqDelta::FlagAsDeletedSet do
   describe '.add' do
     before :each do
       Resque.stub_chain(:redis, :sadd => true)
@@ -15,7 +15,7 @@ describe ThinkingSphinx::Deltas::ResqueDelta::FlagAsDeletedSet do
   describe '.clear!' do
     before :each do
       Resque.stub_chain(:redis, :del)
-      ThinkingSphinx::Deltas::ResqueDelta::DeltaJob.stub(:around_perform_lock)
+      ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob.stub(:around_perform_lock)
     end
 
     it 'should delete all items in the set' do
@@ -25,11 +25,11 @@ describe ThinkingSphinx::Deltas::ResqueDelta::FlagAsDeletedSet do
 
     context "with DeltaJob integration" do
       before :each do
-        ThinkingSphinx::Deltas::ResqueDelta::DeltaJob.stub(:around_perform_lock).and_yield
+        ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob.stub(:around_perform_lock).and_yield
       end
 
       it 'should acquire the DeltaJob lock' do
-        ThinkingSphinx::Deltas::ResqueDelta::DeltaJob.should_receive(:around_perform_lock).once.with('foo_delta')
+        ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob.should_receive(:around_perform_lock).once.with('foo_delta')
         subject.clear!('foo_core')
       end
 
@@ -44,7 +44,7 @@ describe ThinkingSphinx::Deltas::ResqueDelta::FlagAsDeletedSet do
     let(:core_indices) { %w[foo_core bar_core] }
 
     it 'should clear each index' do
-      ThinkingSphinx::Deltas::ResqueDelta::IndexUtils.stub_chain(:core_indices, :each).tap do |s|
+      ThinkingSphinx::Deltas::SidekiqDelta::IndexUtils.stub_chain(:core_indices, :each).tap do |s|
         core_indices.inject(s) do |s, index|
           s.and_yield(index)
         end

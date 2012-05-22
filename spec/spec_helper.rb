@@ -6,6 +6,23 @@ require 'flying_sphinx/resque_delta'
 require 'mock_redis'
 require 'fakefs/spec_helpers'
 
+
+#to make sidekiq inline
+module Sidekiq
+  module Worker
+    def self.included(base)
+      base.extend(ClassMethods)
+    end
+
+    module ClassMethods
+      def perform_async(*args)
+        worker = new
+        worker.send(:perform,*args)
+      end
+    end
+  end
+end
+
 RSpec.configure do |c|
   c.filter_run :focus => true
   c.run_all_when_everything_filtered = true

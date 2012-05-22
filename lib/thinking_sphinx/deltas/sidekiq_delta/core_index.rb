@@ -1,4 +1,4 @@
-class ThinkingSphinx::Deltas::ResqueDelta::CoreIndex
+class ThinkingSphinx::Deltas::SidekiqDelta::CoreIndex
 
   def sphinx_indices
     unless @sphinx_indices
@@ -24,7 +24,7 @@ class ThinkingSphinx::Deltas::ResqueDelta::CoreIndex
   #
   # Returns nothing.
   def lock_delta(index_name)
-    ThinkingSphinx::Deltas::ResqueDelta.lock("#{index_name}_delta")
+    ThinkingSphinx::Deltas::SidekiqDelta.lock("#{index_name}_delta")
   end
 
   # Public: Unlock a delta index for indexing or new index jobs.
@@ -37,7 +37,7 @@ class ThinkingSphinx::Deltas::ResqueDelta::CoreIndex
   #
   # Returns nothing.
   def unlock_delta(index_name)
-    ThinkingSphinx::Deltas::ResqueDelta.unlock("#{index_name}_delta")
+    ThinkingSphinx::Deltas::SidekiqDelta.unlock("#{index_name}_delta")
   end
 
   # Public: Lock all delta indexes against indexing or new index jobs.
@@ -73,17 +73,14 @@ class ThinkingSphinx::Deltas::ResqueDelta::CoreIndex
       ret = nil
 
       with_delta_index_lock(index_name) do
-        ThinkingSphinx::Deltas::ResqueDelta.prepare_for_core_index(index_name)
+        ThinkingSphinx::Deltas::SidekiqDelta.prepare_for_core_index(index_name)
         ts_config.controller.index("#{index_name}_core", :verbose => verbose)
         ret = $?
       end
 
       return false if ret.to_i != 0
 
-      Resque.enqueue(
-        ThinkingSphinx::Deltas::ResqueDelta::DeltaJob,
-        "#{index_name}_delta"
-      )
+      ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob.perform_async("#{index_name}_delta")
     end
 
     true
@@ -107,10 +104,10 @@ class ThinkingSphinx::Deltas::ResqueDelta::CoreIndex
   private
 
   def ts_config
-    ThinkingSphinx::Deltas::ResqueDelta::IndexUtils.ts_config
+    ThinkingSphinx::Deltas::SidekiqDelta::IndexUtils.ts_config
   end
 
   def index_prefixes
-    ThinkingSphinx::Deltas::ResqueDelta::IndexUtils.index_prefixes
+    ThinkingSphinx::Deltas::SidekiqDelta::IndexUtils.index_prefixes
   end
 end

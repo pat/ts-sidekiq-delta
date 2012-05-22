@@ -1,19 +1,19 @@
-require 'thinking_sphinx/deltas/resque_delta'
+require 'thinking_sphinx/deltas/sidekiq_delta'
 
 namespace :thinking_sphinx do
   desc 'Lock all delta indices (Resque will not run indexer or place new jobs on the :ts_delta queue).'
   task :lock_deltas do
-    ThinkingSphinx::Deltas::ResqueDelta::CoreIndex.new.lock_deltas
+    ThinkingSphinx::Deltas::SidekiqDelta::CoreIndex.new.lock_deltas
   end
 
   desc 'Unlock all delta indices.'
   task :unlock_deltas do
-    ThinkingSphinx::Deltas::ResqueDelta::CoreIndex.new.unlock_deltas
+    ThinkingSphinx::Deltas::SidekiqDelta::CoreIndex.new.unlock_deltas
   end
 
   desc 'Like `rake thinking_sphinx:index`, but locks one index at a time.'
   task :smart_index => :app_env do
-    ret = ThinkingSphinx::Deltas::ResqueDelta::CoreIndex.new.smart_index
+    ret = ThinkingSphinx::Deltas::SidekiqDelta::CoreIndex.new.smart_index
 
     abort("Indexing failed.") if ret != true
   end

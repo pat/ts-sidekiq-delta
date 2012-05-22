@@ -18,7 +18,7 @@ When /^I run one delayed job$/ do
 end
 
 When /^I cancel the jobs$/ do
-  ThinkingSphinx::Deltas::ResqueDelta.clear!
+  ThinkingSphinx::Deltas::SidekiqDelta.clear!
 end
 
 When /^I change the name of delayed beta (\w+) to (\w+)$/ do |current, replacement|
@@ -29,5 +29,5 @@ Then /^there should be no more DeltaJobs on the Resque queue$/ do
   job_classes = Resque.redis.lrange("queue:ts_delta", 0, -1).collect do |j|
     Resque.decode(j)["class"]
   end
-  job_classes.should_not include("ThinkingSphinx::Deltas::ResqueDelta::DeltaJob")
+  job_classes.should_not include("ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob")
 end

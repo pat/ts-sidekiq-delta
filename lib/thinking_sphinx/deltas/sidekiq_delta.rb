@@ -1,23 +1,13 @@
-require 'resque'
+require 'sidekiq'
 require 'thinking_sphinx'
 
-require 'thinking_sphinx/deltas/resque_delta/flag_as_deleted_set'
-require 'thinking_sphinx/deltas/resque_delta/index_utils'
+require 'thinking_sphinx/deltas/sidekiq_delta/flag_as_deleted_set'
+require 'thinking_sphinx/deltas/sidekiq_delta/index_utils'
 
-# Delayed Deltas for Thinking Sphinx, using Resque.
-#
-# This documentation is aimed at those reading the code. If you're looking for
-# a guide to Thinking Sphinx and/or deltas, I recommend you start with the
-# Thinking Sphinx site instead - or the README for this library at the very
-# least.
-#
-# @author Patrick Allan
-# @see http://ts.freelancing-gods.com Thinking Sphinx
-#
-class ThinkingSphinx::Deltas::ResqueDelta < ThinkingSphinx::Deltas::DefaultDelta
+class ThinkingSphinx::Deltas::SidekiqDelta < ThinkingSphinx::Deltas::DefaultDelta
   def self.job_types
     [
-      ThinkingSphinx::Deltas::ResqueDelta::DeltaJob
+      ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob
     ]
   end
   
@@ -31,8 +21,8 @@ class ThinkingSphinx::Deltas::ResqueDelta < ThinkingSphinx::Deltas::DefaultDelta
   # If you're sharing a queue with other jobs they'll be deleted!
   def self.clear_thinking_sphinx_queues
     job_types.collect { |c| c.instance_variable_get(:@queue) }.uniq.each do |q|
-      Resque.redis.ltrim("queue:#{q}", 0, 0)
-      Resque.redis.lpop("queue:#{q}")
+      Sidekiq.redis{|r| r.ltrim("queue:#{q}", 0, 0) }
+      Sidekiq.redis{|r| r.lpop("queue:#{q}") }
     end
   end
 
@@ -46,15 +36,15 @@ class ThinkingSphinx::Deltas::ResqueDelta < ThinkingSphinx::Deltas::DefaultDelta
   # Use simplistic locking.  We're assuming that the user won't run more than one
   # `rake ts:si` or `rake ts:in` task at a time.
   def self.lock(index_name)
-    Resque.redis.set("#{job_prefix}:index:#{index_name}:locked", 'true')
+    Sidekiq.redis{|r| r.set("#{job_prefix}:index:#{index_name}:locked", 'true') }
   end
 
   def self.unlock(index_name)
-    Resque.redis.del("#{job_prefix}:index:#{index_name}:locked")
+    Sidekiq.redis{|r| r.del("#{job_prefix}:index:#{index_name}:locked")
   end
 
   def self.locked?(index_name)
-    Resque.redis.get("#{job_prefix}:index:#{index_name}:locked") == 'true'
+    Sidekiq.redis{|r| r.get("#{job_prefix}:index:#{index_name}:locked") == 'true' }
   end
 
   def self.prepare_for_core_index(index_name)
@@ -65,7 +55,9 @@ class ThinkingSphinx::Deltas::ResqueDelta < ThinkingSphinx::Deltas::DefaultDelta
 
     #clear delta jobs
     # dequeue is fast for jobs with arguments
-    Resque.dequeue(ThinkingSphinx::Deltas::ResqueDelta::DeltaJob, delta)
+
+    #remove the ob from sidekiq
+    #Resque.dequeue(ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob, delta)
   end
 
   # Adds a job to the queue for processing the given model's delta index. A job
@@ -86,10 +78,7 @@ class ThinkingSphinx::Deltas::ResqueDelta < ThinkingSphinx::Deltas::DefaultDelta
     return true if skip?(instance)
     model.delta_index_names.each do |delta|
       next if self.class.locked?(delta)
-      Resque.enqueue(
-        ThinkingSphinx::Deltas::ResqueDelta::DeltaJob,
-        delta
-      )
+      ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob.perform_async(delta)
     end
     if instance
       model.core_index_names.each do |core|
