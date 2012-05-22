@@ -4,6 +4,8 @@ require 'thinking_sphinx/deltas/sidekiq_delta'
 require 'mock_redis'
 require 'fakefs/spec_helpers'
 
+require 'pry'
+
 
 #to make sidekiq inline
 module Sidekiq
