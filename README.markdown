@@ -1,24 +1,23 @@
-Delayed Deltas for Thinking Sphinx (with Resque)
+Delayed Deltas for Thinking Sphinx (with Sidekiq)
 ================================================
 **This code is HEAVILY borrowed from
-[ts-delayed-delta](https://github.com/freelancing-god/ts-delayed-delta).**
+[ts-resque-delta](https://github.com/freelancing-god/ts-resque-delta).**
 
 Installation
 ------------
-This gem depends on the following gems: _thinking-sphinx_, _resque_, and
-_resque-lock-timeout_.
+This gem depends on the following gems: _thinking-sphinx_ and _sidekiq_.
 
-    gem install ts-resque-delta
+    gem install ts-sidekiq-delta
 
 Add _ts-resque-delta_ to your **Gemfile** file, with the rest of your gem
 dependencies:
 
-    gem 'ts-resque-delta', '1.1.1'
+    gem 'ts-sidekiq-delta', '0.0.1'
 
 If you're using Rails 3, the rake tasks will automatically be loaded by Rails.
 If you're using Rails 2, add the following line to your **Rakefile**:
 
-    require 'thinking_sphinx/deltas/resque_delta/tasks'
+    require 'thinking_sphinx/deltas/sidekiq_delta/tasks'
 
 Add the delta property to each `define_index` block:
 
@@ -51,20 +50,26 @@ Once you've got it all set up, all you need to do is make sure that the Resque
 worker is running. You can do this by specifying the `:ts_delta` queue when
 running Resque:
 
-    QUEUE=ts_delta,other_queues rake resque:work
+    sidekiq -q ts_delta
 
 Additionally, ts-resque-delta will wrap thinking-sphinx's
 `thinking_sphinx:index` and `thinking_sphinx:reindex` tasks with
 `thinking_sphinx:lock_deltas` and `thinking_sphinx:unlock_deltas`. This will
 prevent the delta indexer from running at the same time as the main indexer.
 
-Finally, ts-resque-delta also provides a rake task called
+Finally, ts-sidekiq-delta also provides a rake task called
 `thinking_sphinx:smart_index` (or `ts:si` for short). This task, instead of
 locking all the delta indexes at once while the main indexer runs, will lock
 each delta index independently and sequentially. Thay way, your delta indexer
 can run while the main indexer is processing large core indexes.
 
-Contributors (for ts-delayed-delta)
+Very little has been changed in this version from the sources below, so very little credit to me.
+
+Author
+-----------------------------------
+* [Danny Hawkins](https://github.com/danhawkins)
+
+Contributors (for ts-resque-delta)
 -----------------------------------
 * [Aaron Gibralter](https://github.com/agibralter)
 * [Ryan Schlesinger](https://github.com/ryansch) (Locking/`smart_index`)
@@ -80,4 +85,4 @@ Original Contributors (for ts-delayed-delta)
 
 Copyright
 ---------
-Copyright (c) 2011 Aaron Gibralter, and released under an MIT Licence.
+Copyright (c) 2012 Danny Hawkins, and released under an MIT Licence.
