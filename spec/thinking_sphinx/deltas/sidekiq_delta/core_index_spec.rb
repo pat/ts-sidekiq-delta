@@ -106,7 +106,7 @@ describe ThinkingSphinx::Deltas::SidekiqDelta::CoreIndex do
       subject.stub(:unlock_delta)
 
       ThinkingSphinx::Deltas::SidekiqDelta.stub(:prepare_for_core_index)
-      Resque.stub(:enqueue)
+      ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob.stub(:perform_async)
     end
 
     it 'should not generate sphinx configuration if INDEX_ONLY is true' do
@@ -174,9 +174,9 @@ describe ThinkingSphinx::Deltas::SidekiqDelta::CoreIndex do
     it 'should create a delta job after the delta is unlocked' do
       # Create a dummy method on subject that's called when Resque.enqueue is called so we can enforce order.
       subject.stub(:resque_called)
-      Resque.stub(:enqueue) { subject.resque_called }
+      ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob.stub(:perform_async) { subject.resque_called }
 
-      Resque.should_receive(:enqueue)
+      ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob.should_receive(:perform_async)
 
       subject.should_receive(:with_delta_index_lock).ordered.exactly(indices.size)
       subject.should_receive(:resque_called).ordered.exactly(indices.size)

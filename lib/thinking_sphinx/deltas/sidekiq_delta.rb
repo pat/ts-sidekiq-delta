@@ -40,7 +40,7 @@ class ThinkingSphinx::Deltas::SidekiqDelta < ThinkingSphinx::Deltas::DefaultDelt
   end
 
   def self.unlock(index_name)
-    Sidekiq.redis{|r| r.del("#{job_prefix}:index:#{index_name}:locked")
+    Sidekiq.redis{|r| r.del("#{job_prefix}:index:#{index_name}:locked") }
   end
 
   def self.locked?(index_name)
@@ -103,5 +103,5 @@ class ThinkingSphinx::Deltas::SidekiqDelta < ThinkingSphinx::Deltas::DefaultDelt
   end
 end
 
-require 'thinking_sphinx/deltas/resque_delta/delta_job'
-require 'thinking_sphinx/deltas/resque_delta/core_index'
+require 'thinking_sphinx/deltas/sidekiq_delta/delta_job'
+require 'thinking_sphinx/deltas/sidekiq_delta/core_index'
