@@ -5,7 +5,7 @@ describe ThinkingSphinx::Deltas::SidekiqDelta do
     ThinkingSphinx.updates_enabled = true
     ThinkingSphinx.deltas_enabled  = true
 
-    Sidekiq.redis = MockRedis.new
+    Sidekiq.redis = { url: "resque://localhost:6379/", namespace: 'test' }
   end
 
   describe '#index' do
@@ -40,7 +40,7 @@ describe ThinkingSphinx::Deltas::SidekiqDelta do
     end
 
     before :each do
-      Resque.stub(:enqueue => true)
+      ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob.stub(:perform_async => true)
     end
 
     context 'updates disabled' do

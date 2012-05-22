@@ -3,11 +3,12 @@ require 'spec_helper'
 describe ThinkingSphinx::Deltas::SidekiqDelta::FlagAsDeletedSet do
   describe '.add' do
     before :each do
-      Resque.stub_chain(:redis, :sadd => true)
+      #Resque.stub_chain(:redis, :sadd => true)
+      Sidekiq.should_receive(:redis){ |r| r.stub(:sadd).and_return(true) }
     end
 
     it 'should add the document id to the correct set' do
-      Resque.redis.should_receive(:sadd).once.with(subject.set_name('foo_core'), 42)
+      Sidekiq.should_receive(:redis) {|r| r.should_receive(:sadd).with(subject.set_name('foo_core'), 42) }
       subject.add('foo_core', 42)
     end
   end

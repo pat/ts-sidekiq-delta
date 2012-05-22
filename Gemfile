@@ -3,7 +3,10 @@ source "http://rubygems.org"
 # Specify your gem's dependencies in ts-resque-delta.gemspec
 gemspec
 
+gem 'pry'
+
 group :development do
+
   if RUBY_PLATFORM =~ /darwin/i
     gem 'rb-fsevent'
     gem 'ruby_gntp'
