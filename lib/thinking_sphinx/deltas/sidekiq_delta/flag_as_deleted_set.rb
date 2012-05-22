@@ -15,7 +15,6 @@ class ThinkingSphinx::Deltas::SidekiqDelta < ThinkingSphinx::Deltas::DefaultDelt
     end
 
     def add(core_name, document_id)
-      binding.pry
       Sidekiq.redis{|r| r.sadd(set_name(core_name), document_id) }
     end
 

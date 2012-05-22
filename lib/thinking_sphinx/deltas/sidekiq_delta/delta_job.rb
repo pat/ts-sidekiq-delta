@@ -84,7 +84,7 @@ class ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob
 
   protected
 
-  def self.skip?(index)
+  def skip?(index)
     ThinkingSphinx::Deltas::SidekiqDelta.locked?(index)
   end
 
