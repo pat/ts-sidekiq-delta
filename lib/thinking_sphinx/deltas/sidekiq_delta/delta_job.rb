@@ -4,7 +4,7 @@ class ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob
   include Sidekiq::Worker
   # Runs Sphinx's indexer tool to process the index. Currently assumes Sphinx
   # is running.
-  sidekiq_options unique: true, retry: true, queue: 'ts_delta' }
+  sidekiq_options unique: true, retry: true, queue: 'ts_delta'
   # @param [String] index the name of the Sphinx index
   #
   def perform(index)
