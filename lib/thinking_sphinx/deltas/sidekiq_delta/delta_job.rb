@@ -2,10 +2,6 @@
 #
 class ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob
   include Sidekiq::Worker
-  # extend Resque::Plugins::LockTimeout
-  # @queue = :ts_delta
-  # @lock_timeout = 240
-
   # Runs Sphinx's indexer tool to process the index. Currently assumes Sphinx
   # is running.
   #
