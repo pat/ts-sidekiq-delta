@@ -24,15 +24,15 @@ namespace :ts do
   task :si => 'thinking_sphinx:smart_index'
 end
 
-unless Rake::Task.task_defined?('thinking_sphinx:index')
+unless Rake::Task.task_defined?('ts:index')
   require 'thinking_sphinx/tasks'
 end
 
 # Ensure that indexing does not conflict with ts-resque-delta delta jobs.
-Rake::Task['thinking_sphinx:index'].enhance ['thinking_sphinx:lock_deltas'] do
+Rake::Task['ts:index'].enhance ['thinking_sphinx:lock_deltas'] do
   Rake::Task['thinking_sphinx:unlock_deltas'].invoke
 end
 
-Rake::Task['thinking_sphinx:reindex'].enhance ['thinking_sphinx:lock_deltas'] do
+Rake::Task['ts:reindex'].enhance ['thinking_sphinx:lock_deltas'] do
   Rake::Task['thinking_sphinx:unlock_deltas'].invoke
 end
