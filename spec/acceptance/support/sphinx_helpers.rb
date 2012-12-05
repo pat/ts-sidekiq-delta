@@ -20,7 +20,7 @@ module SphinxHelpers
     Sidekiq::Client.registered_queues.each do |queue_name|
       while message = namespace.lpop("queue:#{queue_name}")
         message = JSON.parse(message)
-        constantize(message['class']).new.perform(*message['args'])
+        message['class'].constantize.new.perform(*message['args'])
       end
     end
   end
