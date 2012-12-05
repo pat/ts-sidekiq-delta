@@ -33,6 +33,6 @@ Rake::Task['ts:index'].enhance ['thinking_sphinx:lock_deltas'] do
   Rake::Task['thinking_sphinx:unlock_deltas'].invoke
 end
 
-Rake::Task['ts:reindex'].enhance ['thinking_sphinx:lock_deltas'] do
-  Rake::Task['thinking_sphinx:unlock_deltas'].invoke
-end
+# Rake::Task['ts:reindex'].enhance ['thinking_sphinx:lock_deltas'] do
+#   Rake::Task['thinking_sphinx:unlock_deltas'].invoke
+# end
