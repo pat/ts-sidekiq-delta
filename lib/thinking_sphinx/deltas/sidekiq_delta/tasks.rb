@@ -29,9 +29,9 @@ unless Rake::Task.task_defined?('ts:index')
 end
 
 # Ensure that indexing does not conflict with ts-resque-delta delta jobs.
-Rake::Task['ts:index'].enhance ['thinking_sphinx:lock_deltas'] do
-  Rake::Task['thinking_sphinx:unlock_deltas'].invoke
-end
+# Rake::Task['ts:index'].enhance ['thinking_sphinx:lock_deltas'] do
+#   Rake::Task['thinking_sphinx:unlock_deltas'].invoke
+# end
 
 # Rake::Task['ts:reindex'].enhance ['thinking_sphinx:lock_deltas'] do
 #   Rake::Task['thinking_sphinx:unlock_deltas'].invoke
