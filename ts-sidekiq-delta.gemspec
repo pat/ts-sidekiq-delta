@@ -1,13 +1,14 @@
 # -*- encoding: utf-8 -*-
 Gem::Specification.new do |s|
   s.name        = 'ts-sidekiq-delta'
-  s.version     = '0.0.1'
+  s.version     = '0.1.0'
   s.platform    = Gem::Platform::RUBY
   s.authors     = ['Pat Allan', 'Aaron Gibralter', 'Danny Hawkins']
-  s.email       = ['danny.hawkins@gmail.com', 'pat@freelancing-gods.com']
+  s.email       = ['pat@freelancing-gods.com', 'danny.hawkins@gmail.com']
   s.homepage    = 'https://github.com/pat/ts-sidekiq-delta'
   s.summary     = %q{Thinking Sphinx - Sidekiq Deltas}
   s.description = %q{Manage delta indexes via Sidekiq for Thinking Sphinx}
+  s.license     = 'MIT'
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")

@@ -1,88 +1,36 @@
-Delayed Deltas for Thinking Sphinx (with Sidekiq)
-================================================
-**This code is HEAVILY borrowed from
-[ts-resque-delta](https://github.com/freelancing-god/ts-resque-delta).**
+# Delayed Deltas for Thinking Sphinx with Sidekiq
 
-Installation
-------------
-This gem depends on the following gems: _thinking-sphinx_ and _sidekiq_.
+This code was heavily based on Aaron Gibralter's [ts-resque-delta](https://github.com/agibralter/ts-resque-delta), and was initially adapted for Sidekiq by [Danny Hawkins](https://github.com/danhawkins). This release is maintained by [Pat Allan](https://github.com/pat).
 
-    gem install ts-sidekiq-delta
+This version of `ts-sidekiq-delta` works only with [Thinking Sphinx](https://github.com/pat/thinking-sphinx) v3 or newer. v1/v2 releases are not supported, and almost certainly will never be. It does work with the Flying Sphinx service, provided you're using 1.0.0 or newer of the `flying-sphinx` gem.
 
-Add _ts-resque-delta_ to your **Gemfile** file, with the rest of your gem
-dependencies:
+## Installation
 
-    gem 'ts-sidekiq-delta', '0.0.1'
+Get it into your Gemfile - and don't forget the version constraint!
 
-If you're using Rails 3, the rake tasks will automatically be loaded by Rails.
-If you're using Rails 2, add the following line to your **Rakefile**:
+    gem 'ts-sidekiq-delta', '~> 0.1.0'
 
-    require 'thinking_sphinx/deltas/sidekiq_delta/tasks'
+## Usage
 
-Add the delta property to each `define_index` block:
+In your index definitions, you'll want to include the delta setting as an initial option:
 
-    define_index do
-      # ...
-      set_property :delta => ThinkingSphinx::Deltas::SidekiqDelta
+    ThinkingSphinx::Index.define(:article,
+      :with  => :active_record,
+      :delta => ThinkingSphinx::Deltas::SidekiqDelta
+    ) do
+      # fields and attributes and such
     end
 
 If you've never used delta indexes before, you'll want to add the boolean
-column named `:delta` to each model's table (note, you must set the `:default`
-value to `true`):
+column named `:delta` to each model's table and a corresponding database index:
 
-    def self.up
-      add_column :foos, :delta, :boolean, :default => true, :null => false
+    def change
+      add_column :articles, :delta, :boolean, :default => true, :null => false
+      add_index  :articles, :delta
     end
 
-Also, I highly recommend adding a MySQL index to the table of any model using
-delta indexes. The Sphinx indexer uses `WHERE table.delta = 1` whenever the
-delta indexer runs and `... = 0` whenever the normal indexer runs. Having the
-MySQL index on the delta column will generally be a win:
+From here on in, just use Thinking Sphinx and Sidekiq as you normally would, and you'll find your Sphinx indices are updated quite promptly by Sidekiq.
 
-    def self.up
-      # ...
-      add_index :foos, :delta
-    end
+## Licence
 
-Usage
------
-Once you've got it all set up, all you need to do is make sure that the Resque
-worker is running. You can do this by specifying the `:ts_delta` queue when
-running Resque:
-
-    sidekiq -q ts_delta
-
-Additionally, ts-resque-delta will wrap thinking-sphinx's
-`thinking_sphinx:index` and `thinking_sphinx:reindex` tasks with
-`thinking_sphinx:lock_deltas` and `thinking_sphinx:unlock_deltas`. This will
-prevent the delta indexer from running at the same time as the main indexer.
-
-Finally, ts-sidekiq-delta also provides a rake task called
-`thinking_sphinx:smart_index` (or `ts:si` for short). This task, instead of
-locking all the delta indexes at once while the main indexer runs, will lock
-each delta index independently and sequentially. Thay way, your delta indexer
-can run while the main indexer is processing large core indexes.
-
-Very little has been changed in this version from the sources below, so very little credit to me.
-
-Author
------------------------------------
-* [Danny Hawkins](https://github.com/danhawkins)
-
-Contributors (for ts-resque-delta)
------------------------------------
-* [Aaron Gibralter](https://github.com/agibralter)
-* [Ryan Schlesinger](https://github.com/ryansch) (Locking/`smart_index`)
-* [Pat Allan](https://github.com/freelancing-god) (FlyingSphinx support)
-
-Original Contributors (for ts-delayed-delta)
---------------------------------------------
-* [Pat Allan](https://github.com/freelancing-god)
-* [Ryan Schlesinger](https://github.com/ryansch) (Allowing installs as a plugin)
-* [Maximilian Schulz](https://max.jungeelite.de) (Ensuring compatibility with Bundler)
-* [Edgars Beigarts](https://github.com/ebeigarts) (Adding intelligent description for tasks)
-* [Alexander Simonov](https://simonov.me/) (Explicit table definition)
-
-Copyright
----------
-Copyright (c) 2012 Danny Hawkins, and released under an MIT Licence.
+Copyright (c) 2013, ts-sidekiq-delta was originally developed by Danny Hawkins, is currently maintained by Pat Allan, and is released under the open MIT Licence.
