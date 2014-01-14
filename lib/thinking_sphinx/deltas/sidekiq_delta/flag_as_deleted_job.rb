@@ -7,7 +7,7 @@ class ThinkingSphinx::Deltas::SidekiqDelta::FlagAsDeletedJob
 
   def perform(index, document_id)
     ThinkingSphinx::Connection.pool.take do |connection|
-      connection.query(
+      connection.execute(
         Riddle::Query.update(index, document_id, :sphinx_deleted => true)
       )
     end
