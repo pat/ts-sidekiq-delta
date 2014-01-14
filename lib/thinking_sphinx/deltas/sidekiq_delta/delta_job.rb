@@ -10,8 +10,7 @@ class ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob
   # @param [String] index the name of the Sphinx index
   #
   def perform(index)
-    config = ThinkingSphinx::Configuration.instance
-    config.controller.index index, :verbose => !config.settings['quiet_deltas']
+    ThinkingSphinx::Deltas::IndexJob.new(index).perform
   end
 
   # Try again later if lock is in use.

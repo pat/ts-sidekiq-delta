@@ -6,11 +6,7 @@ class ThinkingSphinx::Deltas::SidekiqDelta::FlagAsDeletedJob
   sidekiq_options unique: true, retry: true, queue: 'ts_delta'
 
   def perform(index, document_id)
-    ThinkingSphinx::Connection.pool.take do |connection|
-      connection.execute(
-        Riddle::Query.update(index, document_id, :sphinx_deleted => true)
-      )
-    end
+    ThinkingSphinx::Deltas::DeleteJob.new(index, document_id).perform
   rescue Mysql2::Error => error
     # This isn't vital, so don't raise the error
   end
