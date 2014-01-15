@@ -8,7 +8,9 @@ This version of `ts-sidekiq-delta` works only with [Thinking Sphinx](https://git
 
 Get it into your Gemfile - and don't forget the version constraint!
 
-    gem 'ts-sidekiq-delta', '~> 0.1.0'
+    gem 'ts-sidekiq-delta', '~> 0.2.0'
+
+If you're using Thinking Sphinx v3.0.x, you'll need to jump back to the 0.1.0 release of this gem.
 
 ## Usage
 

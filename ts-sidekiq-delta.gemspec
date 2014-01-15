@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 Gem::Specification.new do |s|
   s.name        = 'ts-sidekiq-delta'
-  s.version     = '0.1.0'
+  s.version     = '0.2.0'
   s.platform    = Gem::Platform::RUBY
   s.authors     = ['Pat Allan', 'Aaron Gibralter', 'Danny Hawkins']
   s.email       = ['pat@freelancing-gods.com', 'danny.hawkins@gmail.com']
