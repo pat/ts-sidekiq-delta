@@ -33,6 +33,8 @@ column named `:delta` to each model's table and a corresponding database index:
 
 From here on in, just use Thinking Sphinx and Sidekiq as you normally would, and you'll find your Sphinx indices are updated quite promptly by Sidekiq.
 
+Make sure you have a sidekiq worker monitoring the `ts_delta` queue.
+
 ## Licence
 
 Copyright (c) 2013, ts-sidekiq-delta was originally developed by Danny Hawkins, is currently maintained by Pat Allan, and is released under the open MIT Licence.
