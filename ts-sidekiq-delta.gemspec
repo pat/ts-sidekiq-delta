@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   s.add_dependency 'thinking-sphinx', '>= 3.1.0'
-  s.add_dependency 'sidekiq',         '>= 2.5.4'
+  s.add_dependency 'sidekiq', '>= 2.5', '< 5.0'
 
   s.add_development_dependency 'activerecord',     '>= 3.1.0'
   s.add_development_dependency 'database_cleaner', '>= 0.5.2'
