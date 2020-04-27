@@ -3,7 +3,7 @@
 class ThinkingSphinx::Deltas::SidekiqDelta::DeltaJob
   include Sidekiq::Worker
 
-  sidekiq_options unique: :until_executed, retry: true, queue: 'ts_delta'
+  sidekiq_options lock: :until_executed, retry: true, queue: 'ts_delta', unique_prefix: 'tsdelta'
 
   # Runs Sphinx's indexer tool to process the index.
   #
