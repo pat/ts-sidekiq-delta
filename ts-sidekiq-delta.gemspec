@@ -20,8 +20,11 @@ Gem::Specification.new do |s|
   s.add_dependency 'sidekiq-unique-jobs', '>= 6.0.0'
 
   s.add_development_dependency 'activerecord',     '>= 3.1.0'
+  s.add_development_dependency 'combustion'
+  s.add_development_dependency 'cucumber'
   s.add_development_dependency 'database_cleaner', '>= 0.5.2'
   s.add_development_dependency 'mysql2',           '>= 0.3.12b4'
   s.add_development_dependency 'rake',             '>= 0.8.7'
+  s.add_development_dependency 'redis-namespace'
   s.add_development_dependency 'rspec',            '>= 2.11.0'
 end

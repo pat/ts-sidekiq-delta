@@ -2,7 +2,7 @@ require 'acceptance/spec_helper'
 
 describe 'SQL delta indexing', :live => true do
   before :each do
-    Sidekiq.redis = { url: "resque://localhost:6379/", namespace: 'test' }
+    Sidekiq.redis = { url: "redis://localhost:6379/", namespace: 'test' }
   end
 
   it "automatically indexes new records" do
