@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 Gem::Specification.new do |s|
   s.name        = 'ts-sidekiq-delta'
-  s.version     = '0.2.0'
+  s.version     = '0.3.0'
   s.platform    = Gem::Platform::RUBY
   s.authors     = ['Pat Allan', 'Aaron Gibralter', 'Danny Hawkins']
   s.email       = ['pat@freelancing-gods.com', 'danny.hawkins@gmail.com']
@@ -15,8 +15,9 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
-  s.add_dependency 'thinking-sphinx', '>= 3.1.0'
-  s.add_dependency 'sidekiq',         '>= 2.5.4'
+  s.add_dependency 'thinking-sphinx',     '>= 3.1.0'
+  s.add_dependency 'sidekiq',             '>= 2.5.4'
+  s.add_dependency 'sidekiq-unique-jobs', '>= 6.0.0'
 
   s.add_development_dependency 'activerecord',     '>= 3.1.0'
   s.add_development_dependency 'database_cleaner', '>= 0.5.2'
