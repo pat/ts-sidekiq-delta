@@ -8,7 +8,7 @@ This version of `ts-sidekiq-delta` works only with [Thinking Sphinx](https://git
 
 Get it into your Gemfile - and don't forget the version constraint!
 
-    gem 'ts-sidekiq-delta', '~> 0.3.0'
+    gem 'ts-sidekiq-delta', '~> 0.4.0'
 
 If you're using Thinking Sphinx v3.0.x, you'll need to jump back to the 0.1.0 release of this gem.
 
@@ -37,4 +37,4 @@ Make sure you have a sidekiq worker monitoring the `ts_delta` queue.
 
 ## Licence
 
-Copyright (c) 2013, ts-sidekiq-delta was originally developed by Danny Hawkins, is currently maintained by Pat Allan, and is released under the open MIT Licence.
+Copyright (c) 2013-2021, ts-sidekiq-delta was originally developed by Danny Hawkins, is currently maintained by Pat Allan, and is released under the open MIT Licence.
