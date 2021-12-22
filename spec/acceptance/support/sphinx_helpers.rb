@@ -14,10 +14,11 @@ module SphinxHelpers
   end
 
   def work
-    client    = Redis.connect(:url => "resque://localhost:6379/")
+    client    = Redis.new(:url => "redis://localhost:6379/")
     namespace = Redis::Namespace.new('test', :redis => client)
 
-    Sidekiq::Client.registered_queues.each do |queue_name|
+    queues = namespace.sscan_each("queues").to_a
+    queues.each do |queue_name|
       while message = namespace.lpop("queue:#{queue_name}")
         message = JSON.parse(message)
         message['class'].constantize.new.perform(*message['args'])

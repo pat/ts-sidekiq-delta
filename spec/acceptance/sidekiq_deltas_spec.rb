@@ -28,7 +28,7 @@ describe 'SQL delta indexing', :live => true do
 
     Book.search('Harry').to_a.should == [book]
 
-    book.reload.update_attributes(:author => 'Terry Pratchett')
+    book.reload.update!(:author => 'Terry Pratchett')
     work
     sleep 0.25
 
@@ -41,7 +41,7 @@ describe 'SQL delta indexing', :live => true do
 
     Book.search('Harry').to_a.should == [book]
 
-    book.reload.update_attributes(:author => 'Terry Pratchett')
+    book.reload.update!(:author => 'Terry Pratchett')
     work
     sleep 0.25
 

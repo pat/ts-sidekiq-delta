@@ -3,9 +3,7 @@ RSpec.configure do |config|
     DatabaseCleaner.strategy = :truncation
   end
 
-  config.after(:each) do
-    if example.example_group_instance.class.metadata[:live]
-      DatabaseCleaner.clean
-    end
+  config.after(:each, :live) do
+    DatabaseCleaner.clean
   end
 end
